@@ -1,8 +1,8 @@
 # basic-kubernetes-operator
-// TODO(user): Add simple overview of use/purpose
+Personal project to aid in learning about the development of Kubernetes Operators.
 
 ## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+This Kubernetes Operator is a simple and straightforward Operator that handles syncing of ConfigMaps across different namespaces within a cluster.
 
 ## Getting Started
 
