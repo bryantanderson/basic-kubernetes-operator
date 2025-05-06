@@ -13,10 +13,10 @@ This Kubernetes Operator is a simple and straightforward Operator that handles s
 - Access to a Kubernetes v1.11.3+ cluster.
 
 ### To Deploy on the cluster
-**Build and push your image to the location specified by `IMG`:**
+**Build and push your image to the location specified by `IMG` (given you have access to the registry):**
 
 ```sh
-make docker-build docker-push IMG=<some-registry>/basic-kubernetes-operator:tag
+make docker-build docker-push IMG=bryantandersonc/basic-kubernetes-operator:latest
 ```
 
 **NOTE:** This image ought to be published in the personal registry you specified.
@@ -32,7 +32,7 @@ make install
 **Deploy the Manager to the cluster with the image specified by `IMG`:**
 
 ```sh
-make deploy IMG=<some-registry>/basic-kubernetes-operator:tag
+make deploy IMG=bryantandersonc/basic-kubernetes-operator:latest
 ```
 
 > **NOTE**: If you encounter RBAC errors, you may need to grant yourself cluster-admin
