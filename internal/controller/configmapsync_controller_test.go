@@ -32,40 +32,41 @@ import (
 
 var _ = Describe("ConfigMapSync Controller", func() {
 	Context("When reconciling a resource", func() {
-		const resourceName = "test-resource"
-
 		ctx := context.Background()
 
-		typeNamespacedName := types.NamespacedName{
+		resourceName := "testmap"
+
+		sourceNamespaceName := types.NamespacedName{
 			Name:      resourceName,
-			Namespace: "default", // TODO(user):Modify as needed
+			Namespace: "testone",
 		}
-		configmapsync := &appsv1.ConfigMapSync{}
+		destinationNamespaceName := types.NamespacedName{
+			Name:      resourceName,
+			Namespace: "testtwo",
+		}
+
+		configmapsync := &appsv1.ConfigMapSync{
+			Spec: appsv1.ConfigMapSyncSpec{
+				DestinationNamespace: destinationNamespaceName.Namespace,
+				SourceNamespace:      sourceNamespaceName.Namespace,
+				ConfigMapName:        resourceName,
+			},
+		}
 
 		BeforeEach(func() {
 			By("creating the custom resource for the Kind ConfigMapSync")
-			err := k8sClient.Get(ctx, typeNamespacedName, configmapsync)
+			err := k8sClient.Get(ctx, sourceNamespaceName, configmapsync)
 			if err != nil && errors.IsNotFound(err) {
 				resource := &appsv1.ConfigMapSync{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      resourceName,
-						Namespace: "default",
+						Name:      sourceNamespaceName.Name,
+						Namespace: sourceNamespaceName.Namespace,
 					},
-					// TODO(user): Specify other spec details if needed.
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
 			}
 		})
 
-		AfterEach(func() {
-			// TODO(user): Cleanup logic after each test, like removing the resource instance.
-			resource := &appsv1.ConfigMapSync{}
-			err := k8sClient.Get(ctx, typeNamespacedName, resource)
-			Expect(err).NotTo(HaveOccurred())
-
-			By("Cleanup the specific resource instance ConfigMapSync")
-			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
-		})
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
 			controllerReconciler := &ConfigMapSyncReconciler{
@@ -74,11 +75,9 @@ var _ = Describe("ConfigMapSync Controller", func() {
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
-				NamespacedName: typeNamespacedName,
+				NamespacedName: sourceNamespaceName,
 			})
 			Expect(err).NotTo(HaveOccurred())
-			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
-			// Example: If you expect a certain status condition after reconciliation, verify it here.
 		})
 	})
 })
