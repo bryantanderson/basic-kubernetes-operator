@@ -20,22 +20,19 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // ConfigMapSyncSpec defines the desired state of ConfigMapSync.
 type ConfigMapSyncSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of ConfigMapSync. Edit configmapsync_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	SourceNamespace      string `json:"sourceNamespace"`
+	DestinationNamespace string `json:"destinationNamespace"`
+	ConfigMapName        string `json:"configMapName"`
 }
 
 // ConfigMapSyncStatus defines the observed state of ConfigMapSync.
 type ConfigMapSyncStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	LastSyncTime metav1.Time `json:"lastSyncTime"`
 }
 
 // +kubebuilder:object:root=true
