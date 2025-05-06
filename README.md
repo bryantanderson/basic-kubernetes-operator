@@ -6,14 +6,16 @@ This Kubernetes Operator is a simple and straightforward Operator that handles s
 
 Once the operator is deployed, and an instance of `ConfigMapSync` is created, test the controller by creating ConfigMaps in 2 different namespaces, and modifying one. 
 
-Example usage via `kubectl`:
+Example flow using `kubectl` and `minikube` (Kind should work too):
 
+minikube start
 kubectl create namespace testone
 kubectl create namespace testtwo
 kubectl -n testone create configmap testmap
 kubectl -n testtwo create configmap testmap
 kubectl apply -f config/samples/apps_v1_configmapsync.yaml
 (edit the ConfigMap in the testone Namespace)
+minikube stop
 
 ## Getting Started
 
