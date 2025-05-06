@@ -58,21 +58,21 @@ func (r *ConfigMapSyncReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	// Fetch the source ConfigMap
 	sourceConfigMap := &corev1.ConfigMap{}
 	sourceConfigMapName := types.NamespacedName{
-        Namespace: configMapSync.Spec.SourceNamespace,
-        Name:      configMapSync.Spec.ConfigMapName,
-    }
+		Namespace: configMapSync.Spec.SourceNamespace,
+		Name:      configMapSync.Spec.ConfigMapName,
+	}
 	if err := r.Get(ctx, sourceConfigMapName, sourceConfigMap); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	// Fetch the destination ConfigMap
 	destinationConfigMap := &corev1.ConfigMap{}
-    destinationConfigMapName := types.NamespacedName{
-        Namespace: configMapSync.Spec.DestinationNamespace,
-        Name:      configMapSync.Spec.ConfigMapName,
-    }
+	destinationConfigMapName := types.NamespacedName{
+		Namespace: configMapSync.Spec.DestinationNamespace,
+		Name:      configMapSync.Spec.ConfigMapName,
+	}
 	if err := r.Get(ctx, destinationConfigMapName, destinationConfigMap); err != nil {
-		// If the err is not a basic NotFound error, return 
+		// If the err is not a basic NotFound error, return
 		if !strings.Contains(err.Error(), "not found") {
 			return ctrl.Result{}, err
 		}
@@ -92,9 +92,9 @@ func (r *ConfigMapSyncReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	// If we've reached this point then both config maps exist and we can do the syncing
 	destinationConfigMap.Data = sourceConfigMap.Data
-    if err := r.Update(ctx, destinationConfigMap); err != nil {
-        return ctrl.Result{}, err
-    }
+	if err := r.Update(ctx, destinationConfigMap); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }
