@@ -18,8 +18,12 @@ package controller
 
 import (
 	"context"
+	"strings"
 
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -39,17 +43,58 @@ type ConfigMapSyncReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the ConfigMapSync object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.20.4/pkg/reconcile
 func (r *ConfigMapSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = logf.FromContext(ctx)
 
-	// TODO(user): your logic here
+	// Fetch the ConfigMapSync instance
+	configMapSync := &appsv1.ConfigMapSync{}
+	if err := r.Get(ctx, req.NamespacedName, configMapSync); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	// Fetch the source ConfigMap
+	sourceConfigMap := &corev1.ConfigMap{}
+	sourceConfigMapName := types.NamespacedName{
+        Namespace: configMapSync.Spec.SourceNamespace,
+        Name:      configMapSync.Spec.ConfigMapName,
+    }
+	if err := r.Get(ctx, sourceConfigMapName, sourceConfigMap); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// Fetch the destination ConfigMap
+	destinationConfigMap := &corev1.ConfigMap{}
+    destinationConfigMapName := types.NamespacedName{
+        Namespace: configMapSync.Spec.DestinationNamespace,
+        Name:      configMapSync.Spec.ConfigMapName,
+    }
+	if err := r.Get(ctx, destinationConfigMapName, destinationConfigMap); err != nil {
+		// If the err is not a basic NotFound error, return 
+		if !strings.Contains(err.Error(), "not found") {
+			return ctrl.Result{}, err
+		}
+		// Otherwise simply create a new ConfigMap within the destination namespace,
+		// which is just a copy of the source ConfigMap
+		destinationConfigMap = &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      configMapSync.Spec.ConfigMapName,
+				Namespace: configMapSync.Spec.DestinationNamespace,
+			},
+			Data: sourceConfigMap.Data,
+		}
+		if err := r.Create(ctx, destinationConfigMap); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	// If we've reached this point then both config maps exist and we can do the syncing
+	destinationConfigMap.Data = sourceConfigMap.Data
+    if err := r.Update(ctx, destinationConfigMap); err != nil {
+        return ctrl.Result{}, err
+    }
 
 	return ctrl.Result{}, nil
 }
