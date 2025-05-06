@@ -103,6 +103,7 @@ func (r *ConfigMapSyncReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 func (r *ConfigMapSyncReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&appsv1.ConfigMapSync{}).
+		Owns(&corev1.ConfigMap{}).
 		Named("configmapsync").
 		Complete(r)
 }
